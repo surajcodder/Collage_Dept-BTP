@@ -1,0 +1,173 @@
+_schema-version: "3.1"
+ID: Department
+description: A simple CAP project.
+version: 1.0.0
+modules:
+- name: Department-srv
+  type: nodejs
+  path: gen/srv
+  requires:
+  - name: Destination-dept
+  - name: Department-db
+  - name: uaa_Department
+  provides:
+  - name: srv-api
+    properties:
+      srv-url: ${default-url}
+  parameters:
+    buildpack: nodejs_buildpack
+    readiness-health-check-http-endpoint: /health
+    readiness-health-check-type: http
+  build-parameters:
+    builder: npm
+- name: Department-app-content
+  type: com.sap.application.content
+  path: .
+  requires:
+  - name: Department-repo-host
+    parameters:
+      content-target: true
+  build-parameters:
+    build-result: resources
+    requires:
+    - artifacts:
+      - department.zip
+      name: department
+      target-path: resources/
+    - artifacts:
+      - teacher.zip
+      name: teacher
+      target-path: resources/
+    - artifacts:
+      - lecturer.zip
+      name: lecturer
+      target-path: resources/
+- name: department
+  type: html5
+  path: app/department
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+- name: teacher
+  type: html5
+  path: app/teacher
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+- name: Department-db-deployer
+  type: hdb
+  path: gen/db
+  requires:
+  - name: Department-db
+  parameters:
+    buildpack: nodejs_buildpack
+- name: Department-destination-content
+  type: com.sap.application.content
+  requires:
+  - name: Department-destination-service
+    parameters:
+      content-target: true
+  - name: Department-repo-host
+    parameters:
+      service-key:
+        name: Department-repo-host-key
+  - name: uaa_Department
+    parameters:
+      service-key:
+        name: uaa_Department-key
+  parameters:
+    content:
+      instance:
+        destinations:
+        - Name: Dept_router_Department_repo_host
+          ServiceInstanceName: Department-html5-srv
+          ServiceKeyName: Department-repo-host-key
+          sap.cloud.service: Dept_router
+        - Authentication: OAuth2UserTokenExchange
+          Name: Dept_router_uaa_Department
+          ServiceInstanceName: Department-xsuaa-service
+          ServiceKeyName: uaa_Department-key
+          sap.cloud.service: Dept_router
+        existing_destinations_policy: ignore
+  build-parameters:
+    no-source: true
+- name: lecturer
+  type: html5
+  path: app/lecturer
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+resources:
+- name: Department-repo-host
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: html5-apps-repo
+    service-name: Department-html5-srv
+    service-plan: app-host
+- name: Department-destination-service
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      HTML5Runtime_enabled: true
+      version: 1.0.0
+    service: destination
+    service-name: Department-destination-service
+    service-plan: lite
+- name: Department-db
+  type: com.sap.xs.hdi-container
+  parameters:
+    service: hana
+    service-plan: hdi-shared
+- name: Destination-dept
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      HTML5Runtime_enabled: false
+      init_data:
+        instance:
+          destinations:
+          - Authentication: NoAuthentication
+            Name: ui5
+            ProxyType: Internet
+            Type: HTTP
+            URL: https://ui5.sap.com
+          - Authentication: NoAuthentication
+            HTML5.DynamicDestination: true
+            HTML5.ForwardAuthToken: true
+            Name: Department-srv-api
+            ProxyType: Internet
+            Type: HTTP
+            URL: ~{srv-api/srv-url}
+          existing_destinations_policy: update
+    service: destination
+    service-plan: lite
+  requires:
+  - name: srv-api
+- name: uaa_Department
+  type: org.cloudfoundry.managed-service
+  parameters:
+    path: ./xs-security.json
+    service: xsuaa
+    service-name: Department-xsuaa-service
+    service-plan: application
+parameters:
+  deploy_mode: html5-repo
+  enable-parallel-deployments: true
+build-parameters:
+  before-all:
+  - builder: custom
+    commands:
+    - npm ci
+    - npx cds build --production

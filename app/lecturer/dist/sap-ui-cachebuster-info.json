@@ -1,0 +1,20 @@
+{
+  "ext/fragment/FileAttachment.fragment.xml": 1724309622184,
+  "Component.js": 1724308328555,
+  "ext/controller/LecturerObjectController.controller.js": 1724308797166,
+  "ext/controller/LecturerListController.controller.js": 1724308787642,
+  "manifest.json": 1724410769635,
+  "ext/fragment/FileAttachment.js": 1724316991273,
+  "ext/fragment/FileAttachment-dbg.js": 1724316991273,
+  "ext/fragment/FileAttachment.js.map": 1724410769809,
+  "ext/controller/LecturerObjectController-dbg.controller.js": 1724308797166,
+  "ext/controller/LecturerObjectController.controller.js.map": 1724410769819,
+  "ext/controller/LecturerListController-dbg.controller.js": 1724308787642,
+  "ext/controller/LecturerListController.controller.js.map": 1724410769810,
+  "Component-dbg.js": 1724308328555,
+  "Component.js.map": 1724410769797,
+  "Component-preload.js": 1724410770031,
+  "Component-preload.js.map": 1724410770031,
+  "i18n/i18n.properties": 1724308352319,
+  "index.html": 1724308328555
+}

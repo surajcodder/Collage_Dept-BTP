@@ -1,0 +1,66 @@
+{
+  "name": "Department",
+  "version": "1.0.0",
+  "description": "A simple CAP project.",
+  "repository": "<Add your repository here>",
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "@sap-cloud-sdk/connectivity": "^3.18.0",
+    "@sap-cloud-sdk/http-client": "^2.9.0",
+    "@sap-cloud-sdk/resilience": "^3.17.0",
+    "@sap/cds": "^7",
+    "@sap/cds-hana": "^2",
+    "axios": "^1.7.2",
+    "express": "^4"
+  },
+  "devDependencies": {
+    "@cap-js/sqlite": "^1",
+    "@sap/cds-dk": "^7",
+    "@sap/eslint-plugin-cds": "^3",
+    "@sap/ux-specification": "^1.120.17",
+    "eslint": "^9",
+    "rimraf": "^5.0.5"
+  },
+  "scripts": {
+    "start": "cds-serve",
+    "watch-department": "cds watch --open department/webapp/index.html?sap-ui-xx-viewCache=false",
+    "undeploy": "cf undeploy Department --delete-services --delete-service-keys --delete-service-brokers",
+    "build": "rimraf resources mta_archives && mbt build --mtar archive",
+    "deploy": "cf deploy mta_archives/archive.mtar --retries 1",
+    "watch-teacher": "cds watch --open teacher/webapp/index.html?sap-ui-xx-viewCache=false",
+    "watch-lecturer": "cds watch --open lecturer/webapp/index.html?sap-ui-xx-viewCache=false"
+  },
+  "sapux": [
+    "app/department",
+    "app/teacher",
+    "app/lecturer"
+  ],
+  "cds": {
+    "requires": {
+      "db": "hana",
+      "auth": "dummy",
+      "spa_api": {
+        "kind": "odata-v2",
+        "credentials": {
+          "destination": "spa_bpa_destination",
+          "url": "https://spa-api-gateway-bpi-us-prod.cfapps.us10.hana.ondemand.com",
+          "authentication": "OAuth2ClientCredentials",
+          "clientId": "sb-309c57b0-3e10-4f04-8649-7e3dbcbe8b62!b308792|xsuaa!b49390",
+          "clientSecret": "721cd97a-0ab0-47fb-9769-a552ccf0226f$yDG1X01EU052tQAoeBoCds66d0IloSRgdpHpTADn0_o=",
+          "tokenServiceUrl": "https://f5b5e17atrial.authentication.us10.hana.ondemand.com/oauth/token"
+        },
+        "destinationOptions": {
+          "selectionStrategy": "alwaysProvider",
+          "jwt": null
+        }
+      }
+    },
+    "fiori": {
+      "bypass_draft": true
+    },
+    "uaa": {
+      "kind": "xsuaa"
+    }
+  }
+}
