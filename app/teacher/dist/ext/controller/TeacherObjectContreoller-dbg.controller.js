@@ -14,9 +14,9 @@ sap.ui.define([
 				// Access the Fiori elements extensionAPI via this.base.getExtensionAPI
 				var oModel = this.base.getExtensionAPI().getModel();
 				// Use for debugging purposes
-				   var oUserdata = new sap.ushell.services.UserInfo().getEmail();
-				    oUser = oUserdata;
-				    alert(oUser);
+				var oUserdata = new sap.ushell.services.UserInfo().getEmail();
+				oUser = oUserdata;
+				alert(oUser);
 
 				// oUser = 'aditya.yadav@peolsolutions.com';
 				// oUser = 'suman.senapati@peolsolutions.com';
@@ -269,105 +269,8 @@ sap.ui.define([
 		},
 
 
-		// calculateAge: function (dob) {
-		// 	var today = new Date();
-		// 	console.log("Calculating age...");
-		// 	var birthDate = new Date(dob);
-		// 	var age = today.getFullYear() - birthDate.getFullYear();
-		// 	var m = today.getMonth() - birthDate.getMonth();
-		// 	if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-		// 		age--;
-		// 	}
-		// 	return age;
-		// },
-
-		// setAgeField: function (age) {
-		// 	var that = this;
-		// 	setTimeout(function () {
-		// 		that.base.getView().findAggregatedObjects(true, function (control) {
-		// 			return control.isA("sap.m.Input") && control.getId().includes("Age");
-		// 		}).forEach(function (oControl) {
-		// 			oControl.setValue(age);  // Set the Age field value
-		// 			console.log("Age field set to:", age);  // Debugging log
-		// 		});
-		// 	}.bind(that), 500);  // Adjusted delay to ensure everything is ready
-		// },
-
-		// _createEntity: function (item) {
-		// 	// debugger
-		// 	var data = {
-		// 		mediaType: item.getMediaType(),
-		// 		fileName: item.getFileName(),
-		// 		size: item.getFileObject().size,
-		// 		url: "", // Set URL if applicable
-		// 		TeacherID: this.getView().getBindingContext().getProperty("ID") // Assuming context is set to a Teacher entity
-		// 	};
-		// 	var settings = {
-		// 		url: sServiceUrl + "/items",
-		// 		method: "POST",
-		// 		headers: {
-		// 			"Content-Type": "application/json"
-		// 		},
-		// 		data: JSON.stringify(data)
-		// 	};
-
-		// 	return new Promise(function (resolve, reject) {
-		// 		$.ajax(settings)
-		// 			.done(function (results) {
-		// 				resolve(results.ID);
-		// 			})
-		// 			.fail(function (err) {
-		// 				reject(err);
-		// 			});
-		// 	});
-		// },
-		// _uploadContent: function (item, id) {
-		// 	var url = `/items(${id})`;
-		// 	item.setUploadUrl(url);
-
-		// 	var oUploadSet = this.byId("UploadSet");
-		// 	oUploadSet.setHttpRequestMethod("PUT");
-
-		// 	oUploadSet.uploadItem(item);
-
-		// 	// Optional: Attach error handler to track issues
-		// 	oUploadSet.attachUploadComplete(function (oEvent) {
-		// 		if (oEvent.getParameter("success")) {
-		// 			MessageToast.show("Upload successful!");
-		// 		} else {
-		// 			MessageToast.show("Upload failed.");
-		// 		}
-		// 	});
-		// },
-		// onUploadSelectedButton: function () {
-		// 	// debugger
-		//     var oUploadSet = this.byId("UploadSet");
-
-		//     var items = oUploadSet.getItems();
-		//     var that = this;
-
-		//     items.forEach(function (item) {
-		//         that._createEntity(item)
-		//             .then(function (id) {
-		//                 that._uploadContent(item, id);
-		//             })
-		//             .catch(function (err) {
-		//                 console.error("Error creating entity or uploading content:", err);
-		//                 MessageToast.show("Error uploading file.");
-		//             });
-		//     });
-		// },
-
-		// _getUploadButton: function(oUploadSet) {
-		// 	// Access the internal upload button of the UploadSet
-		// 	var oButton = oUploadSet._oFileUploader._getFileUploader().getButton();
-		// 	return oButton;
-		// },
 		fetchAndProcessData: async function (sServiceUrl) {
 			var that = this;
-
-
-
 			// Perform any asynchronous operations here using jQuery AJAX
 			try {
 				const response = await new Promise((resolve, reject) => {
@@ -397,10 +300,6 @@ sap.ui.define([
 			} catch (error) {
 				console.error('Error fetching data', error);
 			}
-
-
-			
-
 
 			// Fetch data from Roll entity
 			try {
@@ -462,25 +361,15 @@ sap.ui.define([
 				if (userRole === 'Admin') {
 					debugger
 					console.log('same');
-					// this.base.getView().findAggregatedObjects(true, function (control) {
-					// 	return control.isA("sap.m.Button");
-					// }).forEach(function (oButton) {
-					// 	if (oButton.getId().includes("Edit") || oButton.getId().includes("Delete")) {
-					// 		oButton.setVisible(true);
-					// 		oButton.setEnabled(true);
-					// 	}
-					// });
 
 					try {
-
-
 						var wur = window.location.href;
 						var hashPart = wur.split('#')[1];
 						console.log(hashPart);
-		
+
 						var ttuuid = hashPart.match(/ttuuid=([^,]+)/)[1];
 						console.log(ttuuid);
-		
+
 						const ApprovedResponse = await new Promise((resolve, reject) => {
 							jQuery.ajax({
 								url: `${sServiceUrl}/Teacher(ttuuid=${ttuuid},IsActiveEntity=true)`, // Corrected URI
@@ -495,17 +384,11 @@ sap.ui.define([
 								}
 							});
 						});
-		
+
 						// Process the ApprovedResponse as needed
 						console.log(ApprovedResponse);
-		
-		
-		
-		
-		
-		
 						// console.log('Fetched Authorization data:', ApprovedResponse);
-		
+
 						var userROLL;
 						if (ApprovedResponse && ApprovedResponse.Status) {
 							console.log(ApprovedResponse.Status);
@@ -516,7 +399,7 @@ sap.ui.define([
 						} else {
 							console.log('No data found or invalid response format');
 						}
-		
+
 						this.base.getView().findAggregatedObjects(true, function (control) {
 							return control.isA("sap.m.Button");
 						}).forEach(function (oButton) {
@@ -530,7 +413,7 @@ sap.ui.define([
 								}
 							}
 						});
-		
+
 					} catch (error) {
 						console.error('Error fetching role data', error);
 					}
@@ -553,7 +436,7 @@ sap.ui.define([
 			} catch (error) {
 				console.error('Error fetching Roll data', error);
 			}
-			
+
 
 		}
 	});

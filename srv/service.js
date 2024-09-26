@@ -45,8 +45,13 @@ module.exports = cds.service.impl(async function () {
         age--;
     }
   
-    return age;
+    if (age < 18 || age > 70) {
+        return { error: "Please enter a valid date of birth that results in an age between 18 and 70 years." };
+    }
+  
+    return { age };
   }
+  
 
 
 
@@ -321,40 +326,57 @@ module.exports = cds.service.impl(async function () {
       }
     }
 
+    var str1 = 'Teacher(ttuuid=';
+    var str2 =  req.data.ttuuid;
+    var str3 = ',IsActiveEntity=true)/techToFile';
+    var linkurl = str1 + str2 + str3;
+
     debugger
     const workflowContent = JSON.stringify({
       "definitionId": "us10.f5b5e17atrial.teacherapproval1.myprocess1",
       "context": {
-        "teacherName": req.data.Name,
-        "phoneNo": req.data.PhoneNumber,
-        "email": req.data.Email,
-        "address": req.data.Address,
-        "teacherid": req.data.TeacherID,
-        "tuuid": req.data.ttuuid,
-        "rejectedby": emailForRejected,
-        "age": req.data.Age,
-        "gender": req.data.Gender,
-        "dob": req.data.DOB,
-        "hodemail": emailForRejected
+          "teacherName": req.data.Name,
+          "phoneNo": req.data.PhoneNumber,
+          "email": req.data.Email,
+          "address": req.data.Address,
+          "tuuid": req.data.ttuuid,
+          "rejectedby": emailForRejected,
+          "age": req.data.Age,
+          "gender": req.data.Gender,
+          "dob": req.data.DOB,
+          "hodemail": emailForRejected,
+          "additionalSkills": req.data.AdditionalSkills,
+          "dept": req.data.Dep,
+          "teacherid": req.data.TeacherID,
+           "url": linkurl
       }
-    });
+  }
+    );
 
     const token = await generateToken();
+    console.log(token);
     const authHeader = `Bearer ${token}`;
     const cds = require('@sap/cds');
     const destination = await cds.connect.to('spa_api');
-    const result = await axios.post('https://spa-api-gateway-bpi-us-prod.cfapps.us10.hana.ondemand.com/workflow/rest/v1/workflow-instances', workflowContent, {
-      headers: {
-        "Accept-Language": "en",
-        "DataServiceVersion": "2.0",
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-        "Authorization": authHeader
-      }
-    });
+    try {
+      const result = await axios.post('https://spa-api-gateway-bpi-us-prod.cfapps.us10.hana.ondemand.com/workflow/rest/v1/workflow-instances', workflowContent, {
+        headers: {
+          "Accept-Language": "en",
+          "DataServiceVersion": "2.0",
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+          "Authorization": authHeader
+        }
+      });
+      return result;
+    } catch (error) {
+      console.error('Error response:', error.response.data);  // Log the error response
+      throw error;
+    }
+    
     debugger;
     return result;
-    // debugger
+    debugger
 
     // const result = await destination.post('/workflow/rest/v1/workflow-instances', workflowContent,
     //   {
@@ -381,21 +403,6 @@ module.exports = cds.service.impl(async function () {
       var idha = req.ttuuid;
       await cds.update(Teacher).set({ TeacherID: newTID }).where({ ttuuid: idha });
       await cds.update(Sequence).set({ Value: newId }).where({ Name: 'TeacherID' });
-      const teacher = await SELECT.one.from(Teacher).where({ ttuuid: idha });
-      await INSERT.into(ApprovedTeacher).entries({
-        TeacherID: newTID,
-        Name: teacher.Name,
-        Gender: teacher.Gender,
-        PhoneNumber: teacher.PhoneNumber,
-        Email: teacher.Email,
-        Address: teacher.Address,
-        Dep: teacher.Dep,
-        Age: teacher.Age,
-        DOB: teacher.DOB,
-        AdditionalSkills: teacher.AdditionalSkills,
-        Status: req.Status,  // Set the status to 'Approved'
-        RejectedBy: teacher.RejectedBy // Include this field, though it might not be relevant for approved teachers
-    });
     }
     // var tid = 'T99';
 
@@ -404,6 +411,7 @@ module.exports = cds.service.impl(async function () {
 
   // Handle UPDATE operation for Teacher
   this.before('UPDATE', 'Teacher', async (req) => {
+    const token = await generateToken();
 
     if(req.data.techToFile){
       for (const stud of req.data.techToFile) { 
@@ -411,30 +419,35 @@ module.exports = cds.service.impl(async function () {
       }
   } 
 
-    // // Check if the phone number already exists
-    // if (req.data.PhoneNumber) {
-    //   const existingPhone = await SELECT.one.from(Teacher).where({ PhoneNumber: req.data.PhoneNumber });
-    //   if (existingPhone) {
-    //     req.error(409, `Phone number ${req.data.PhoneNumber} already exists.`);
-    //   }
-    //   const existingPhone1 = await SELECT.one.from(Teacher).where({ PhoneNumber: req.data.PhoneNumber });
-    //   if (existingPhone1) {
-    //     req.error(409, `Phone number ${req.data.PhoneNumber} already exists.`);
+     // Check if the phone number already exists with a different ID
+     if (req.data.PhoneNumber) {
+      // if (!validatePhoneNumber(req.data.PhoneNumber)) {
+      //     req.error(400, 'Phone number must be exactly 10 digits');
+      //     return;
+      // }
+      const existingPhone = await SELECT.one.from(Teacher)
+          .where({ PhoneNumber: req.data.PhoneNumber, TeacherID: { '!=': req.data.TeacherID } });
+      const existingPhone1 = await SELECT.one.from(Student)
+          .where({ PhoneNumber: req.data.PhoneNumber }) //, TeacherID: { '!=': req.data.TeacherID } });
+      if (existingPhone || existingPhone1) {
+          req.error(409, `Phone number ${req.data.PhoneNumber} already exists.`);
+      }
+  }
 
-    //   }
-    // }
-
-    // // Validate Email
-    // if (req.data.Email) {
-    //   const existingEmail = await SELECT.one.from(Teacher).where({ Email: req.data.Email });
-    //   if (existingEmail) {
-    //     req.error(409, `Email ${req.data.Email} already exists.`);
-    //   }
-    //   const existingEmailStud = await SELECT.one.from(Student).where({ Email: req.data.Email });
-    //   if (existingEmailStud) {
-    //     req.error(409, `Email ${req.data.Email} already exists.`);
-    //   }
-    // }
+  // Validate Email
+  if (req.data.Email) {
+      // if (!validateEmail(req.data.Email)) {
+      //     req.error(400, 'Email is not in a valid format.');
+      //     return;
+      // }
+      const existingEmail = await SELECT.one.from(Teacher)
+          .where({ Email: req.data.Email, TeacherID: { '!=': req.data.TeacherID } });
+      const existingEmail1 = await SELECT.one.from(Student)
+          .where({ Email: req.data.Email })  //, TeacherID: { '!=': req.data.TeacherID } });
+      if (existingEmail || existingEmail1) {
+          req.error(409, `Email ${req.data.Email} already exists with ID '${existingEmail.TeacherID}'.`);
+      }
+    }
 
   });
 
@@ -461,6 +474,7 @@ module.exports = cds.service.impl(async function () {
 
     this.before('CREATE', 'Files', req => {
       debugger
+      
       console.log('Create called')
       console.log(JSON.stringify(req.data))
       req.data.url = `/Files(ID=${req.data.ID},IsActiveEntity=true)/content`
@@ -477,13 +491,37 @@ module.exports = cds.service.impl(async function () {
 
 // Example usage:
  // Format: YYYY-MM-DD
+ const validatePhoneNumber = (phoneNumber) => {
+  const phoneRegex = /^\d{10}$/;  // Regular expression to match exactly 10 digits
+  return phoneRegex.test(phoneNumber);
+};
 
-this.on('READ', Teacher.drafts, async (req, next) => { 
-  debugger  
+const validateEmail = (email)=> {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;  // Regular expression to match valid email addresses
+  return emailRegex.test(email)
+;
+}
+
+
+this.on('READ', Teacher.drafts, async (req, next) => {  
   if(req.data.DOB){
     var age = calculateAge(req.data.DOB);
-    await cds.update(Teacher.drafts).set({ Age: age }).where({ ttuuid: req.data.ttuuid});
+    if (age.error) {
+      // Return an error response if the age is invalid
+      return req.reject(400, age.error);
   }
+    await cds.update(Teacher.drafts).set({ Age: age.age }).where({ ttuuid: req.data.ttuuid});
+  }
+
+  if (req.data.PhoneNumber && !validatePhoneNumber(req.data.PhoneNumber)) {
+    req.error(400, 'Phone number must be exactly 10 digits');
+    return;
+}
+
+if ( req.data.Email && !validateEmail(req.data.Email)) {
+    req.error(400, 'Email is not in a valid format.');
+    return;
+}
 return next();
 });
 this.on('postattach', async (req) => {
@@ -491,6 +529,26 @@ this.on('postattach', async (req) => {
   console.log("functionImport triggered", req.data);
   return "success";
 });
+
+
+// this.on('READ', Teacher.drafts, async (req, next) => {
+//   if (req.data.DOB) {
+//       const ageResult = calculateAge(req.data.DOB);
+
+//       if (ageResult.error) {
+//           // Return an error response if the age is invalid
+//           return req.reject(400, ageResult.error);
+//       }
+
+//       // Update the Age if valid
+//       await cds.update(Teacher.drafts).set({ Age: ageResult.age }).where({ ttuuid: req.data.ttuuid });
+//   }
+
+//   return next();
+// });
+
+
+
 
 
 //   this.before('UPDATE', CollTeacher, req => {
@@ -503,6 +561,19 @@ this.on('postattach', async (req) => {
 //         }
 //     }    
 //  })
+
+// this.before('READ', Files, async (req) => { 
+//   debugger
+//   console.log(req.data.url)
+//   if(!req.headers.x-forwarded-path.includes('odata/v4/my/')){
+//     req.data.url = 'https://f5b5e17atrial-dev15-department-srv.cfapps.us10-001.hana.ondemand.com/odata/v4/my'+req.data.url;
+//   }
+//   console.log(req.data.url);
+//   // inputString.includes('odata/v4/my/');
+//   console.log(req.headers);
+  
+// console.log("dddddddddddddddd2")
+//  });
 
 });
 

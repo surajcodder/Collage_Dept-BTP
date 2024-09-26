@@ -109,6 +109,7 @@ modules:
     - npm install
     - npm run build:cf
     supported-platforms: []
+
 resources:
 - name: Department-repo-host
   type: org.cloudfoundry.managed-service
@@ -143,13 +144,6 @@ resources:
             ProxyType: Internet
             Type: HTTP
             URL: https://ui5.sap.com
-          - Authentication: NoAuthentication
-            HTML5.DynamicDestination: true
-            HTML5.ForwardAuthToken: true
-            Name: Department-srv-api
-            ProxyType: Internet
-            Type: HTTP
-            URL: ~{srv-api/srv-url}
           existing_destinations_policy: update
     service: destination
     service-plan: lite

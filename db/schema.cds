@@ -25,18 +25,19 @@ entity Student {
 entity Teacher {
     key ttuuid           : UUID;
         TeacherID        : String;
-        Name             : String;
-        Gender           : String @title: 'Gender';
-        PhoneNumber      : String;
-        Email            : String;
-        Address          : String;
-        Dep              : String @title: 'Department';
-        Age              : Int16;
-        DOB              : Date;
-        AdditionalSkills : String;
+        Name             : String  @mandatory;
+        Gender           : String  @mandatory  @title: 'Gender';
+        PhoneNumber      : String  @mandatory;
+        Email            : String  @mandatory;
+        Address          : String  @mandatory;
+        Dep              : String  @mandatory  @title: 'Department';
+        Age              : Int16   @mandatory;
+        DOB              : Date    @mandatory;
+        AdditionalSkills : String  @mandatory;
         Status           : String default 'In Process';
         RejectedBy       : String;
-        techToFile : Composition of  many Files on techToFile.fileToTech =$self;
+        techToFile       : Composition of many Files
+                               on techToFile.fileToTech = $self;
 
 }
 
@@ -47,6 +48,7 @@ entity TeacherDetails {
         PhoneNumber  : String            @mandatory;
         Email        : String            @mandatory;
         Address      : String            @mandatory;
+        Status       : String default 'Approved';
         teachToDept  : Association to many Department
                            on teachToDept.DepartmentID = DepartmentID;
 }
@@ -96,7 +98,7 @@ using {
     managed
 } from '@sap/cds/common';
 
-entity Files : cuid, managed{
+entity Files : cuid, managed {
     @Core.MediaType  : mediaType
     content    : LargeBinary;
 
@@ -105,8 +107,9 @@ entity Files : cuid, managed{
     fileName   : String;
     size       : Integer;
     url        : String;
-    ttuuid  : String;
-    fileToTech : Association to one Teacher on fileToTech.ttuuid = ttuuid;
+    ttuuid     : String;
+    fileToTech : Association to one Teacher
+                     on fileToTech.ttuuid = ttuuid;
 }
 
 

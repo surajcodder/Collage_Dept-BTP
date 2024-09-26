@@ -115,6 +115,11 @@ annotate service.TeacherDetails with {
                     ValueListProperty : 'Address',
                     LocalDataProperty : Address,
                 },
+                {
+                    $Type : 'Common.ValueListParameterIn',
+                    ValueListProperty : 'Status',
+                    LocalDataProperty : Status,
+                },
             ],
             Label : 'Lecturer ID',
         },

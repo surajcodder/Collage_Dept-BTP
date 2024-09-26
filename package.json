@@ -6,13 +6,15 @@
   "license": "UNLICENSED",
   "private": true,
   "dependencies": {
+    "@openui5/sap.m": "^1.128.0",
     "@sap-cloud-sdk/connectivity": "^3.18.0",
     "@sap-cloud-sdk/http-client": "^2.9.0",
     "@sap-cloud-sdk/resilience": "^3.17.0",
-    "@sap/cds": "^7",
+    "@sap/cds": "^7.9.4",
     "@sap/cds-hana": "^2",
     "axios": "^1.7.2",
-    "express": "^4"
+    "cors": "^2.8.5",
+    "express": "^4.19.2"
   },
   "devDependencies": {
     "@cap-js/sqlite": "^1",

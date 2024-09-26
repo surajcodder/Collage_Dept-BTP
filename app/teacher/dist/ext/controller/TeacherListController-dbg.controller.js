@@ -19,10 +19,10 @@ sap.ui.define([
             onInit: function () {
                 // Access the Fiori elements extensionAPI via this.base.getExtensionAPI
                 var oModel = this.base.getExtensionAPI().getModel();
-                var oUserdata = new sap.ushell.services.UserInfo().getEmail();
-                oUser = oUserdata;
+                // var oUserdata = new sap.ushell.services.UserInfo().getEmail();
+                // oUser = oUserdata;
                 // Uncomment for testing with a fixed email
-                // oUser = 'suman.senapati@peolsolutions.com';
+                oUser = 'suman.senapati@peolsolutions.com';
                 // oUser = 'aditya.yadav@peolsolutions.com';
             },
 //
@@ -125,7 +125,7 @@ sap.ui.define([
                         this.base.getView().findAggregatedObjects(true, function (control) {
                             return control.isA("sap.fe.macros.controls.FilterBar");
                         }).forEach(function (oFilterBar) {
-                            oFilterBar.setVisible(true);
+                            oFilterBar.setVisible(false);
                         });
 
                         this.base.getView().getContent()[0].mAggregations.header.mAggregations.content[0].mAggregations.items[0].mAggregations.content.setFilterConditions({
